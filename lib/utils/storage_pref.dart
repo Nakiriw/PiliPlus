@@ -103,6 +103,9 @@ abstract final class Pref {
     _ => ThemeMode.system,
   };
 
+  static bool get liquidGlass =>
+      _setting.get(SettingBoxKey.liquidGlass, defaultValue: false);
+
   static List<double> get springDescription => List<double>.from(
     _setting.get(SettingBoxKey.springDescription) ??
         // duration: 0.3, bounce: 0.0

@@ -287,6 +287,14 @@ List<SettingsModel> get styleSettings => [
     getSubtitle: () => '当前模式：${Pref.themeType.desc}',
   ),
   SwitchModel(
+    leading: const Icon(Icons.blur_on_outlined),
+    title: '液态玻璃效果',
+    subtitle: '半透明材质、柔和高光与圆角卡片，桌面端效果更明显',
+    setKey: SettingBoxKey.liquidGlass,
+    defaultVal: false,
+    onChanged: (_) => Get.updateMyAppTheme(),
+  ),
+  SwitchModel(
     leading: const Icon(Icons.invert_colors),
     title: '纯黑主题',
     setKey: SettingBoxKey.isPureBlackTheme,

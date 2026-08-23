@@ -69,7 +69,12 @@ abstract final class ThemeUtils {
         titleSpacing: 0,
         centerTitle: false,
         scrolledUnderElevation: 0,
-        backgroundColor: colorScheme.surface,
+        backgroundColor: Pref.liquidGlass
+            ? colorScheme.surface.withValues(alpha: isDark ? 0.72 : 0.82)
+            : colorScheme.surface,
+        surfaceTintColor: Pref.liquidGlass
+            ? colorScheme.surfaceTint.withValues(alpha: 0.18)
+            : null,
         titleTextStyle: TextStyle(
           fontSize: 16,
           color: colorScheme.onSurface,
@@ -77,7 +82,13 @@ abstract final class ThemeUtils {
         ),
       ),
       navigationBarTheme: NavigationBarThemeData(
+        backgroundColor: Pref.liquidGlass
+            ? colorScheme.surface.withValues(alpha: isDark ? 0.68 : 0.78)
+            : null,
         surfaceTintColor: isDark ? colorScheme.surfaceContainerHighest : null,
+        indicatorShape: Pref.liquidGlass
+            ? const StadiumBorder()
+            : null,
       ),
       snackBarTheme: SnackBarThemeData(
         elevation: 20,
@@ -88,11 +99,35 @@ abstract final class ThemeUtils {
       ),
       popupMenuTheme: PopupMenuThemeData(
         surfaceTintColor: isDark ? colorScheme.surfaceContainerHighest : null,
+        color: Pref.liquidGlass
+            ? colorScheme.surfaceContainer.withValues(alpha: isDark ? 0.82 : 0.9)
+            : null,
+        shape: Pref.liquidGlass
+            ? RoundedRectangleBorder(
+                borderRadius: const BorderRadius.all(Radius.circular(18)),
+                side: BorderSide(
+                  color: colorScheme.outline.withValues(alpha: 0.16),
+                ),
+              )
+            : null,
       ),
       cardTheme: CardThemeData(
-        elevation: 1,
+        elevation: Pref.liquidGlass ? 5 : 1,
         margin: EdgeInsets.zero,
-        shadowColor: Colors.transparent,
+        shadowColor: Pref.liquidGlass
+            ? colorScheme.shadow.withValues(alpha: 0.18)
+            : Colors.transparent,
+        color: Pref.liquidGlass
+            ? colorScheme.surfaceContainer.withValues(alpha: isDark ? 0.62 : 0.72)
+            : null,
+        shape: Pref.liquidGlass
+            ? RoundedRectangleBorder(
+                borderRadius: const BorderRadius.all(Radius.circular(18)),
+                side: BorderSide(
+                  color: colorScheme.outline.withValues(alpha: 0.14),
+                ),
+              )
+            : null,
         surfaceTintColor: isDark ? colorScheme.onSurfaceVariant : null,
       ),
       progressIndicatorTheme: isDark
@@ -109,11 +144,25 @@ abstract final class ThemeUtils {
           fontWeight: fontWeight,
           color: colorScheme.onSurface,
         ),
-        backgroundColor: colorScheme.surface,
+        backgroundColor: Pref.liquidGlass
+            ? colorScheme.surfaceContainer.withValues(alpha: isDark ? 0.84 : 0.92)
+            : colorScheme.surface,
+        surfaceTintColor: Pref.liquidGlass ? colorScheme.surfaceTint : null,
+        shape: Pref.liquidGlass
+            ? RoundedRectangleBorder(
+                borderRadius: const BorderRadius.all(Radius.circular(24)),
+                side: BorderSide(
+                  color: colorScheme.outline.withValues(alpha: 0.16),
+                ),
+              )
+            : null,
         constraints: const BoxConstraints(minWidth: 280, maxWidth: 420),
       ),
       bottomSheetTheme: BottomSheetThemeData(
-        backgroundColor: colorScheme.surface,
+        backgroundColor: Pref.liquidGlass
+            ? colorScheme.surface.withValues(alpha: isDark ? 0.86 : 0.94)
+            : colorScheme.surface,
+        surfaceTintColor: Pref.liquidGlass ? colorScheme.surfaceTint : null,
         shape: const RoundedRectangleBorder(
           borderRadius: Style.bottomSheetRadius,
         ),
