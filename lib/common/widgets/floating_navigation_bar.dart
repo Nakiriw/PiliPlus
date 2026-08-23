@@ -2,7 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:ui' as ui;
+
 import 'package:PiliPlus/utils/extension/theme_ext.dart';
+import 'package:PiliPlus/utils/storage_pref.dart';
 import 'package:material_ui/material_ui.dart';
 
 const double _kMaxLabelTextScaleFactor = 1.3;
@@ -13,10 +16,6 @@ const _kIndicatorWidth = 86.0;
 const _kIndicatorPaddingInt = 4.0;
 const _kIndicatorPadding = EdgeInsets.all(_kIndicatorPaddingInt);
 const _kBorderRadius = BorderRadius.all(.circular(_kNavigationHeight / 2));
-const _kNavigationShape = RoundedSuperellipseBorder(
-  borderRadius: _kBorderRadius,
-);
-
 /// ref [NavigationBar]
 class FloatingNavigationBar extends StatelessWidget {
   // ignore: prefer_const_constructors_in_immutables
@@ -73,6 +72,14 @@ class FloatingNavigationBar extends StatelessWidget {
         defaults.labelBehavior!;
 
     final padding = MediaQuery.viewPaddingOf(context);
+    final liquidGlass = Pref.liquidGlass;
+    final glassBackground =
+        backgroundColor ??
+        navigationBarTheme.backgroundColor ??
+        defaults.backgroundColor!;
+    final glassBorderColor = Theme.of(
+      context,
+    ).colorScheme.outline.withValues(alpha: liquidGlass ? 0.22 : 0.12);
 
     return Padding(
       padding: .fromLTRB(
@@ -84,51 +91,76 @@ class FloatingNavigationBar extends StatelessWidget {
       child: SizedBox(
         height: _kNavigationHeight,
         width: destinations.length * _kIndicatorWidth,
-        child: DecoratedBox(
-          decoration: ShapeDecoration(
-            color: ElevationOverlay.applySurfaceTint(
-              backgroundColor ??
-                  navigationBarTheme.backgroundColor ??
-                  defaults.backgroundColor!,
-              surfaceTintColor ??
-                  navigationBarTheme.surfaceTintColor ??
-                  defaults.surfaceTintColor,
-              elevation ?? navigationBarTheme.elevation ?? defaults.elevation!,
-            ),
-            shape: RoundedSuperellipseBorder(
-              side: defaults.borderSide,
-              borderRadius: _kBorderRadius,
-            ),
-          ),
-          child: Padding(
-            padding: _kIndicatorPadding,
-            child: Row(
-              crossAxisAlignment: .stretch,
-              children: <Widget>[
-                for (int i = 0; i < destinations.length; i++)
-                  Expanded(
-                    child: _SelectableAnimatedBuilder(
-                      duration: animationDuration,
-                      isSelected: i == selectedIndex,
-                      builder: (context, animation) {
-                        return _NavigationDestinationInfo(
-                          index: i,
-                          selectedIndex: selectedIndex,
-                          totalNumberOfDestinations: destinations.length,
-                          selectedAnimation: animation,
-                          labelBehavior: effectiveLabelBehavior,
-                          indicatorColor: indicatorColor,
-                          indicatorShape: indicatorShape,
-                          overlayColor: overlayColor,
-                          onTap: _handleTap(i),
-                          labelTextStyle: labelTextStyle,
-                          labelPadding: labelPadding,
-                          child: destinations[i],
-                        );
-                      },
-                    ),
+        child: ClipRRect(
+          borderRadius: _kBorderRadius,
+          child: BackdropFilter(
+            filter: liquidGlass
+                ? ui.ImageFilter.blur(sigmaX: 18, sigmaY: 18)
+                : ui.ImageFilter.blur(sigmaX: 0, sigmaY: 0),
+            child: DecoratedBox(
+              decoration: ShapeDecoration(
+                color: liquidGlass
+                    ? glassBackground.withValues(alpha: 0.58)
+                    : ElevationOverlay.applySurfaceTint(
+                        glassBackground,
+                        surfaceTintColor ??
+                            navigationBarTheme.surfaceTintColor ??
+                            defaults.surfaceTintColor,
+                        elevation ??
+                            navigationBarTheme.elevation ??
+                            defaults.elevation!,
+                      ),
+                shadows: liquidGlass
+                    ? [
+                        BoxShadow(
+                          color: Theme.of(
+                            context,
+                          ).colorScheme.shadow.withValues(alpha: 0.18),
+                          blurRadius: 24,
+                          offset: const Offset(0, 8),
+                        ),
+                      ]
+                    : null,
+                shape: RoundedSuperellipseBorder(
+                  side: BorderSide(
+                    color: liquidGlass ? glassBorderColor : defaults.borderSide.color,
+                    width: liquidGlass ? 1.0 : defaults.borderSide.width,
                   ),
-              ],
+                  borderRadius: _kBorderRadius,
+                ),
+              ),
+              child: Padding(
+                padding: _kIndicatorPadding,
+                child: Row(
+                  crossAxisAlignment: .stretch,
+                  children: <Widget>[
+                    for (int i = 0; i < destinations.length; i++)
+                      Expanded(
+                        child: _SelectableAnimatedBuilder(
+                          duration: animationDuration,
+                          isSelected: i == selectedIndex,
+                          builder: (context, animation) {
+                            return _NavigationDestinationInfo(
+                              index: i,
+                              selectedIndex: selectedIndex,
+                              totalNumberOfDestinations:
+                                  destinations.length,
+                              selectedAnimation: animation,
+                              labelBehavior: effectiveLabelBehavior,
+                              indicatorColor: indicatorColor,
+                              indicatorShape: indicatorShape,
+                              overlayColor: overlayColor,
+                              onTap: _handleTap(i),
+                              labelTextStyle: labelTextStyle,
+                              labelPadding: labelPadding,
+                              child: destinations[i],
+                            );
+                          },
+                        ),
+                      ),
+                  ],
+                ),
+              ),
             ),
           ),
         ),
@@ -383,6 +415,12 @@ class NavigationIndicator extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final liquidGlass = Pref.liquidGlass;
+    final indicatorColor =
+        color ?? Theme.of(context).colorScheme.secondary;
+    final indicatorWidth = liquidGlass ? _kIndicatorWidth + 24 : width;
+    final indicatorHeight = liquidGlass ? _kNavigationHeight + 24 : height;
+
     return AnimatedBuilder(
       animation: animation,
       builder: (context, child) {
@@ -407,14 +445,54 @@ class NavigationIndicator extends StatelessWidget {
             builder: (context, fadeAnimation) {
               return FadeTransition(
                 opacity: fadeAnimation,
-                child: DecoratedBox(
-                  decoration: ShapeDecoration(
-                    shape: _kNavigationShape,
-                    color: color ?? Theme.of(context).colorScheme.secondary,
-                  ),
-                  child: const SizedBox(
-                    width: _kIndicatorWidth,
-                    height: _kIndicatorHeight,
+                child: BackdropFilter(
+                  filter: liquidGlass
+                      ? ui.ImageFilter.blur(sigmaX: 12, sigmaY: 12)
+                      : ui.ImageFilter.blur(sigmaX: 0, sigmaY: 0),
+                  child: DecoratedBox(
+                    decoration: ShapeDecoration(
+                      shape: RoundedSuperellipseBorder(
+                        borderRadius: BorderRadius.all(
+                          Radius.circular(
+                            liquidGlass ? indicatorHeight / 2 : _kNavigationHeight / 2,
+                          ),
+                        ),
+                      ),
+                      color: liquidGlass
+                          ? indicatorColor.withValues(alpha: 0.15)
+                          : indicatorColor,
+                      shadows: liquidGlass
+                          ? [
+                              BoxShadow(
+                                color: indicatorColor.withValues(alpha: 0.3),
+                                blurRadius: 18,
+                                spreadRadius: 1,
+                              ),
+                            ]
+                          : null,
+                      gradient: liquidGlass
+                          ? LinearGradient(
+                              colors: [
+                                Colors.white.withValues(alpha: 0.3),
+                                indicatorColor.withValues(alpha: 0.2),
+                                indicatorColor.withValues(alpha: 0.08),
+                              ],
+                              stops: const [0, 0.38, 1],
+                              begin: Alignment.topLeft,
+                              end: Alignment.bottomRight,
+                            )
+                          : null,
+                      side: liquidGlass
+                          ? BorderSide(
+                              color: indicatorColor.withValues(alpha: 0.62),
+                              width: 1.25,
+                            )
+                          : BorderSide.none,
+                    ),
+                    child: SizedBox(
+                      width: indicatorWidth,
+                      height: indicatorHeight,
+                    ),
                   ),
                 ),
               );
